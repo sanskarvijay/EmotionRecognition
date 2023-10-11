@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Recognition System</title>
+
+    <!-- Add Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Add custom CSS for styling -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body style="background-image: url('./download.jpg'); background-size: cover; background-repeat: no-repeat;">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">Emotion Recognition</a>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4" style="color: #FF5733;">Human Emotion Recognition System</h1>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card" style="background-color:#add8e6;">
+                    <div class="card-body bg-light">
+                        <h2>Record Speech</h2>
+                        <p>Click the button below to start recording your speech for emotion recognition:</p>
+                        <button id="recordButton" class="btn btn-primary" onclick="startRecording()">Start Recording</button>
+                        <button id="stopButton" class="btn btn-danger" onclick="stopRecording()" disabled>Stop Recording</button>
+                        <!-- Upload Audio button inside the "Record Speech" div -->
+                        <input type="file" id="audioUpload" accept=".wav, .mp3" style="display: none;">
+                        <label for="audioUpload" class="btn btn-secondary" style="background-color: #6c757d;">Upload Audio</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card" style="background-color: #f0f0f0;">
+                    <div class="card-body bg-light">
+                        <h2>Emotion Result</h2>
+                        <p>Emotion detected: <span id="emotionResult" style="color: #FF5733;">No data</span></p>
+                        <!-- Add Predict Emotion button -->
+                        <button id="predictButton" class="btn btn-success" onclick="predictEmotion()">Predict Emotion</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and custom script for speech recognition (you'll need to implement this part) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        let isRecording = false;
+        let mediaRecorder;
+        let audioChunks = [];
+
+        // Function to start recording
+        function startRecording() {
+            if (!isRecording) {
+                if ("Notification" in window) {
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission === "granted") {
+                            navigator.mediaDevices.getUserMedia({ audio: true })
+                                .then(function (stream) {
+                                    mediaRecorder = new MediaRecorder(stream);
+                                    mediaRecorder.ondataavailable = function (e) {
+                                        if (e.data.size > 0) {
+                                            audioChunks.push(e.data);
+                                        }
+                                    };
+                                    mediaRecorder.onstop = function () {
+                                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                                        const audioUrl = URL.createObjectURL(audioBlob);
+                                        // You can do something with the recorded audio, like sending it to a server
+                                        console.log(audioUrl);
+                                    };
+                                    mediaRecorder.start();
+                                    document.getElementById('recordButton').disabled = true;
+                                    document.getElementById('stopButton').disabled = false;
+                                    isRecording = true;
+                                })
+                                .catch(function (error) {
+                                    console.error('Error accessing microphone:', error);
+                                });
+                        } else if (permission === "denied") {
+                            alert('Please enable the microphone and try again.');
+                        } else if (permission === "default") {
+                            alert('You need to allow microphone access to start recording.');
+                        }
+                    });
+                } else {
+                    alert('Your browser does not support notifications. Please enable the microphone manually.');
+                }
+            }
+        }
+
+        // Function to stop recording
+        function stopRecording() {
+            if (isRecording) {
+                mediaRecorder.stop();
+                isRecording = false;
+                document.getElementById('recordButton').disabled = false;
+                document.getElementById('stopButton').disabled = true;
+            }
+        }
+
+        // Placeholder function for predicting emotion
+        function predictEmotion() {
+            // Add code for emotion prediction here
+            alert('Emotion prediction placeholder');
+        }
+    </script>
+</body>
+</html>
